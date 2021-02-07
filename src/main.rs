@@ -19,48 +19,41 @@ fn main() {
     let docs = YamlLoader::load_from_str(&contents).unwrap();
 
     // Multi document support, doc is a yaml::Yaml
-    let doc = &docs[0];
+    let first_yaml_document = &docs[0];
 
     // Debug support
-    println!("{:?}", doc);
+    println!("{:?}", first_yaml_document);
 
     // azure
-    let steps = &doc["steps"];
-
+    let steps = &first_yaml_document["steps"];
     if steps.as_vec().is_some() {
         println!("{:?}", steps);
 
-        for v in steps.as_vec().unwrap() {
-            let x = &v["script"];
+        for step in steps.as_vec().unwrap() {
+            let shell_script = &step["script"];
 
-            println!("{}", x.as_str().unwrap());
+            println!("{}", shell_script.as_str().unwrap());
         }
     }
 
     //github
-    let x = &doc["jobs"]["build"]["steps"];
-    println!("{:?}", x);
+    let gh_steps = &first_yaml_document["jobs"]["build"]["steps"];
+    println!("{:?}", gh_steps);
+    if gh_steps.as_vec().is_some() {
+        for step in gh_steps.as_vec().unwrap() {
+            let shell_script = &step["run"];
 
-    if x.as_vec().is_some() {
-        for v in x.as_vec().unwrap() {
-            let xx = &v["run"];
-
-            if xx.as_str().is_some() {
-                println!("{}", xx.as_str().unwrap());
-                let mut cmds: Vec<&str> = xx.as_str().unwrap().split(" ").collect();
+            if shell_script.as_str().is_some() {
+                println!("{}", shell_script.as_str().unwrap());
+                let mut cmds: Vec<&str> = shell_script.as_str().unwrap().split(" ").collect();
                 let mut mycmd = Command::new(cmds[0]);
                 let u: Vec<_> = cmds.drain(1..).collect();
                                 for cmd in u {
                     println!("{}", cmd);
                     mycmd.arg(cmd);
                 }
-                println!("{:?}", mycmd.output().expect("foo"));
-                // Command::new("ls")
+                println!("{:#?}", mycmd.output().expect("foo"));
             }
-
         }
     }
-
-
-
 }

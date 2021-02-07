@@ -1,5 +1,6 @@
 use std::env;
 use std::fs;
+use std::process::Command;
 
 extern crate yaml_rust;
 use yaml_rust::{YamlLoader};
@@ -46,7 +47,15 @@ fn main() {
 
             if xx.as_str().is_some() {
                 println!("{}", xx.as_str().unwrap());
-
+                let mut cmds: Vec<&str> = xx.as_str().unwrap().split(" ").collect();
+                let mut mycmd = Command::new(cmds[0]);
+                let u: Vec<_> = cmds.drain(1..).collect();
+                                for cmd in u {
+                    println!("{}", cmd);
+                    mycmd.arg(cmd);
+                }
+                println!("{:?}", mycmd.output().expect("foo"));
+                // Command::new("ls")
             }
 
         }

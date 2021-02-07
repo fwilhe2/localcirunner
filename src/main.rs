@@ -42,6 +42,7 @@ fn main() {
     if gh_steps.as_vec().is_some() {
         for step in gh_steps.as_vec().unwrap() {
             let shell_script = &step["run"];
+            let working_directory = &step["working-directory"];
 
             if shell_script.as_str().is_some() {
                 println!("{}", shell_script.as_str().unwrap());
@@ -51,6 +52,9 @@ fn main() {
                                 for cmd in u {
                     println!("{}", cmd);
                     mycmd.arg(cmd);
+                }
+                if working_directory.as_str().is_some() {
+                    mycmd.current_dir(working_directory.as_str().unwrap());
                 }
                 println!("{:#?}", mycmd.output().expect("foo"));
             }

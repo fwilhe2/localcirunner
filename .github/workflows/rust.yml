@@ -20,6 +20,13 @@ jobs:
     - name: Install
       run: cargo install --path .
 
+    - run: localcirunner azure.yaml
+      working-directory: test_data
+
+    - run: localcirunner gh.yaml
+      working-directory: test_data
+
+
     # - name: Run example
     #   run: cargo run azure.yaml --verbose
 

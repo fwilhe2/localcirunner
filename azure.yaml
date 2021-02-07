@@ -1,4 +1,0 @@
-steps:
-- script: npm install
-- script: yarn install
-- script: npm run compile

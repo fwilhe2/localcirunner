@@ -1,0 +1,4 @@
+steps:
+- script: echo npm install
+- script: echo yarn install
+- script: echo npm run compile

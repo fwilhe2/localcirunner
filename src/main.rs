@@ -11,7 +11,7 @@ fn main() {
     let contents = fs::read_to_string(filename).expect("Something went wrong reading the file");
     let docs = YamlLoader::load_from_str(&contents).unwrap();
 
-    // Multi document support, doc is a yaml::Yaml
+    // Multi document support, first_yaml_document is of type yaml::Yaml
     let first_yaml_document = &docs[0];
 
     // Debug support

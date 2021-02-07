@@ -24,8 +24,11 @@ fn main() {
 
         for step in steps.as_vec().unwrap() {
             let shell_script = &step["script"];
+            let working_directory = &step["workingDirectory"];
 
-            println!("{}", shell_script.as_str().unwrap());
+            if shell_script.as_str().is_some() {
+                run_script(shell_script, working_directory)
+            }
         }
     }
 

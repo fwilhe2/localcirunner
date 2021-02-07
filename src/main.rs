@@ -23,14 +23,35 @@ fn main() {
     // Debug support
     println!("{:?}", doc);
 
+    // azure
     let steps = &doc["steps"];
-    println!("{:?}", steps);
-    println!("{:?}", steps[0]);
 
-    for v in steps.as_vec().unwrap() {
-        let x = &v["script"];
+    if steps.as_vec().is_some() {
+        println!("{:?}", steps);
 
-        println!("{}", x.as_str().unwrap());
+        for v in steps.as_vec().unwrap() {
+            let x = &v["script"];
+
+            println!("{}", x.as_str().unwrap());
+        }
     }
+
+    //github
+    let x = &doc["jobs"]["build"]["steps"];
+    println!("{:?}", x);
+
+    if x.as_vec().is_some() {
+        for v in x.as_vec().unwrap() {
+            let xx = &v["run"];
+
+            if xx.as_str().is_some() {
+                println!("{}", xx.as_str().unwrap());
+
+            }
+
+        }
+    }
+
+
 
 }

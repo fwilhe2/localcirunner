@@ -20,3 +20,6 @@ jobs:
 
     - name: Run example
       run: cargo run azure.yaml --verbose
+
+    - name: Run example
+      run: cargo run gh.yaml --verbose

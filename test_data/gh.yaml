@@ -1,3 +1,7 @@
+name: CI
+
+on: [push]
+
 jobs:
   build:
 
@@ -6,10 +10,10 @@ jobs:
     steps:
     - uses: actions/checkout@v2
     - name: configure
-      run: echo ./configure
+      run: ./configure
     - name: make
-      run: echo make
+      run: make
     - name: make check
-      run: echo make check
+      run: make check
     - name: make distcheck
-      run: echo make distcheck
+      run: make distcheck

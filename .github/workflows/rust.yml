@@ -12,6 +12,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2
+    - uses: fwilhe2/setup-kotlin@main
+      with:
+        version: 1.4.30
+        install-native: false
 
     - name: Build
       run: cargo build --verbose
@@ -23,9 +27,24 @@ jobs:
     - run: localcirunner azure.yaml
       working-directory: test_data
 
+    - run: |
+          val f = java.io.File("test_data/a.out")
+          if (!f.exists()) {
+            throw RuntimeException("expected output file does not exist")
+          }
+          f.delete()
+      shell: kotlin -howtorun .main.kts {0}
+
     - run: localcirunner gh.yaml
       working-directory: test_data
 
+    - run: |
+          val f = java.io.File("test_data/a.out")
+          if (!f.exists()) {
+            throw RuntimeException("expected output file does not exist")
+          }
+          f.delete()
+      shell: kotlin -howtorun .main.kts {0}
 
     # - name: Run example
     #   run: cargo run azure.yaml --verbose

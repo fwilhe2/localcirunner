@@ -1,4 +1,10 @@
+trigger:
+- {{ branch }}
+
+pool:
+  vmImage: 'ubuntu-latest'
+
 steps:
-- script: echo npm install
-- script: echo yarn install
-- script: echo npm run compile
+- script: ./configure
+- script: make
+- script: make check

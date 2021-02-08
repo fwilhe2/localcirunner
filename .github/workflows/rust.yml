@@ -46,6 +46,19 @@ jobs:
           f.delete()
       shell: kotlin -howtorun .main.kts {0}
 
+
+    - name: Build
+      run: cargo build --release --verbose
+
+    - name: Upload release binary
+      uses: actions/upload-release-asset@v1.0.2
+      env:
+        GITHUB_TOKEN: ${{ github.token }}
+      with:
+        upload_url: "https://uploads.github.com/repos/fwilhe2/localcirunner/releases/37758047/assets{?name,label}"
+        asset_path: ./target/release/localcirunner
+        asset_name: localcirunner
+        asset_content_type: application/octet-stream
     # - name: Run example
     #   run: cargo run azure.yaml --verbose
 

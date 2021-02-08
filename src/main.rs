@@ -9,6 +9,9 @@ use yaml_rust::YamlLoader;
 
 fn main() {
     let args: Vec<String> = env::args().collect();
+    if args.len() < 2 {
+        panic!("Missing required argument filename.\n  Usage: localcirunner .github/workflows/test.yml")
+    }
     let filename = &args[1];
     let contents = fs::read_to_string(filename).expect("Something went wrong reading the file");
     let docs = YamlLoader::load_from_str(&contents).unwrap();

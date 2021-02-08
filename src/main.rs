@@ -49,17 +49,20 @@ fn main() {
 
 fn run_script(shell_script: &yaml_rust::Yaml, working_directory: &yaml_rust::Yaml) {
     println!("{}", shell_script.as_str().unwrap());
-    let mut shell_script_words: Vec<&str> = shell_script.as_str().unwrap().split(" ").collect();
-    let mut my_command = Command::new(shell_script_words[0]);
-    let command_arguments: Vec<_> = shell_script_words.drain(1..).collect();
-    for argument in command_arguments {
-        my_command.arg(argument);
+    let shell_script_lines: Vec<&str> = shell_script.as_str().unwrap().split("\n").collect();
+    for line in shell_script_lines {
+        let mut shell_script_words: Vec<&str> = line.trim().split(" ").collect();
+        let mut my_command = Command::new(shell_script_words[0]);
+        let command_arguments: Vec<_> = shell_script_words.drain(1..).collect();
+        for argument in command_arguments {
+            my_command.arg(argument);
+        }
+        if working_directory.as_str().is_some() {
+            my_command.current_dir(working_directory.as_str().unwrap());
+        }
+        println!(
+            "{:#?}",
+            my_command.output().expect("Could not execute command")
+        );
     }
-    if working_directory.as_str().is_some() {
-        my_command.current_dir(working_directory.as_str().unwrap());
-    }
-    println!(
-        "{:#?}",
-        my_command.output().expect("Could not execute command")
-    );
 }

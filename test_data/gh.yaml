@@ -21,3 +21,17 @@ jobs:
       run: |
         ls
         pwd
+
+    - name: Display the path
+      run: echo $PATH
+      shell: bash
+
+    - name: Display the path
+      run: echo ${env:PATH}
+      shell: powershell
+
+    - name: Display the path
+      run: |
+        import os
+        print(os.environ['PATH'])
+      shell: python

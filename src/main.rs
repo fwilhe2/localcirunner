@@ -46,9 +46,10 @@ fn main() {
             let shell_script = &step["run"];
             let working_directory = &step["working-directory"];
             let name = &step["name"];
+            let shell = &step["shell"];
 
             if shell_script.as_str().is_some() {
-                run_script(shell_script, name, working_directory)
+                run_script(shell_script, name, working_directory, shell)
             }
         }
     }
@@ -58,6 +59,7 @@ fn run_script(
     shell_script: &yaml_rust::Yaml,
     name: &yaml_rust::Yaml,
     working_directory: &yaml_rust::Yaml,
+    shell: &yaml_rust::Yaml,
 ) {
     // println!("{}", shell_script.as_str().unwrap());
     let shell_script_lines: Vec<&str> = shell_script.as_str().unwrap().split("\n").collect();

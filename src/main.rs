@@ -62,7 +62,7 @@ fn run_script(
     // println!("{}", shell_script.as_str().unwrap());
     let shell_script_lines: Vec<&str> = shell_script.as_str().unwrap().split("\n").collect();
     for line in shell_script_lines {
-        let mut shell_script_words: Vec<&str> = line.trim().split(" ").collect();
+        let mut shell_script_words: Vec<&str> = shell_line_to_words(line);
         let mut my_command = Command::new(shell_script_words[0]);
         let command_arguments: Vec<_> = shell_script_words.drain(1..).collect();
         for argument in command_arguments {
@@ -88,5 +88,20 @@ fn run_script(
         io::stderr().write_all(&output.stderr).unwrap();
 
         assert!(output.status.success());
+    }
+}
+
+fn shell_line_to_words(line: &str) -> Vec<&str> {
+    line.trim().split(" ").collect()
+}
+
+#[cfg(test)]
+mod tests {
+    // Note this useful idiom: importing names from outer (for mod tests) scope.
+    use super::*;
+
+    #[test]
+    fn test_shell_line_to_words() {
+        assert_eq!(shell_line_to_words(" this is my line "), vec!["this", "is", "my", "line"]);
     }
 }

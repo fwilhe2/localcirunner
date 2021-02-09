@@ -55,7 +55,7 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ github.token }}
       with:
-        upload_url: 'https://uploads.github.com/repos/fwilhe2/localcirunner/releases/37758047/assets{?name,label}'
+        upload_url: "https://uploads.github.com/repos/fwilhe2/localcirunner/releases/37758047/assets{?name,label}"
         asset_path: ./target/release/localcirunner
         asset_name: localcirunner
         asset_content_type: application/octet-stream

@@ -14,44 +14,41 @@ fn main() {
     }
     let filename = &args[1];
     let contents = fs::read_to_string(filename).expect("Something went wrong reading the file");
-    let docs = YamlLoader::load_from_str(&contents).unwrap();
 
-    // Multi document support, first_yaml_document is of type yaml::Yaml
-    let first_yaml_document = &docs[0];
+    let pipeline = parse_yaml_string(&contents);
 
-    // Debug support
-    // println!("{:?}", first_yaml_document);
+
 
     // azure
-    let steps = &first_yaml_document["steps"];
-    if steps.as_vec().is_some() {
-        // println!("{:?}", steps);
+    // let steps = &first_yaml_document["steps"];
+    // if steps.as_vec().is_some() {
+    //     // println!("{:?}", steps);
 
-        for step in steps.as_vec().unwrap() {
-            let shell_script = &step["script"];
-            let working_directory = &step["workingDirectory"];
-            let name = &step["displayName"];
+    //     for step in steps.as_vec().unwrap() {
+    //         let shell_script = &step["script"];
+    //         let working_directory = &step["workingDirectory"];
+    //         let name = &step["displayName"];
 
-            if shell_script.as_str().is_some() {
-                run_script(shell_script, name, working_directory)
-            }
-        }
-    }
+    //         if shell_script.as_str().is_some() {
+    //             run_script(shell_script, name, working_directory)
+    //         }
+    //     }
+    // }
 
-    //github
-    let gh_steps = &first_yaml_document["jobs"]["build"]["steps"];
-    // println!("{:?}", gh_steps);
-    if gh_steps.as_vec().is_some() {
-        for step in gh_steps.as_vec().unwrap() {
-            let shell_script = &step["run"];
-            let working_directory = &step["working-directory"];
-            let name = &step["name"];
+    // //github
+    // let gh_steps = &first_yaml_document["jobs"]["build"]["steps"];
+    // // println!("{:?}", gh_steps);
+    // if gh_steps.as_vec().is_some() {
+    //     for step in gh_steps.as_vec().unwrap() {
+    //         let shell_script = &step["run"];
+    //         let working_directory = &step["working-directory"];
+    //         let name = &step["name"];
 
-            if shell_script.as_str().is_some() {
-                run_script(shell_script, name, working_directory)
-            }
-        }
-    }
+    //         if shell_script.as_str().is_some() {
+    //             run_script(shell_script, name, working_directory)
+    //         }
+    //     }
+    // }
 }
 
 fn run_script(
@@ -92,6 +89,26 @@ fn run_script(
 }
 
 fn parse_yaml_string(yaml: &str) -> Pipeline {
+
+
+    let docs = YamlLoader::load_from_str(&yaml).unwrap();
+
+    // Multi document support, first_yaml_document is of type yaml::Yaml
+    let first_yaml_document = &docs[0];
+
+    // Debug support
+    // println!("{:?}", first_yaml_document);
+
+
+    // azure
+    let steps = &first_yaml_document["steps"];
+    println!("{:?}", steps);
+
+
+    //github
+    let gh_steps = &first_yaml_document["jobs"]["build"]["steps"];
+    println!("{:?}", gh_steps);
+
 
     return Pipeline{
         steps: vec![]
@@ -134,32 +151,14 @@ mod tests {
     #[test]
     fn test_pipeline_1() {
         let input =
-"
-name: CI
-
-on: [push]
-
-jobs:
+"jobs:
     build:
-
-    runs-on: ubuntu-latest
-
-    steps:
-    - uses: actions/checkout@v2
-    - name: configure
-        run: ./configure
-    - name: make
-        run: make
-    - name: make check
-        run: make check
-    - name: make distcheck
-        run: make distcheck
-    - name: Test Multiline String
-        run: |
-        ls
-        pwd
-";
-        let actual = parse_yaml_string(input);
+      steps:
+        - name: configure
+          run: ./configure
+        - name: make
+          run: make";
+        let actual = parse_yaml_string(&input);
 
         println!(
                 "{:#?}",

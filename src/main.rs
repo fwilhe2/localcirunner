@@ -91,6 +91,32 @@ fn run_script(
     }
 }
 
+fn parse_yaml_string(yaml: &str) -> Pipeline {
+
+    return Pipeline{
+        steps: vec![]
+    };
+}
+
+#[derive(Debug)]
+pub struct Pipeline {
+    steps: Vec<Step>
+}
+
+impl PartialEq for Pipeline {
+    fn eq(&self, other: &Self) -> bool {
+        self.steps.len() == other.steps.len()
+    }
+}
+
+
+#[derive(Debug)]
+pub struct Step {
+    shell_script: String,
+    name: String,
+    working_directory: String,
+}
+
 fn shell_line_to_words(line: &str) -> Vec<&str> {
     line.trim().split(" ").collect()
 }
@@ -103,5 +129,43 @@ mod tests {
     #[test]
     fn test_shell_line_to_words() {
         assert_eq!(shell_line_to_words(" this is my line "), vec!["this", "is", "my", "line"]);
+    }
+
+    #[test]
+    fn test_pipeline_1() {
+        let input =
+"
+name: CI
+
+on: [push]
+
+jobs:
+    build:
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: configure
+        run: ./configure
+    - name: make
+        run: make
+    - name: make check
+        run: make check
+    - name: make distcheck
+        run: make distcheck
+    - name: Test Multiline String
+        run: |
+        ls
+        pwd
+";
+        let actual = parse_yaml_string(input);
+
+        println!(
+                "{:#?}",
+                actual);
+        assert_eq!(actual, Pipeline{
+            steps: vec![]
+        })
     }
 }

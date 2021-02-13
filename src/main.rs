@@ -17,8 +17,6 @@ fn main() {
 
     let pipeline = parse_yaml_string(&contents);
 
-
-
     // azure
     // let steps = &first_yaml_document["steps"];
     // if steps.as_vec().is_some() {
@@ -89,8 +87,6 @@ fn run_script(
 }
 
 fn parse_yaml_string(yaml: &str) -> Pipeline {
-
-
     let docs = YamlLoader::load_from_str(&yaml).unwrap();
 
     // Multi document support, first_yaml_document is of type yaml::Yaml
@@ -98,7 +94,6 @@ fn parse_yaml_string(yaml: &str) -> Pipeline {
 
     // Debug support
     // println!("{:?}", first_yaml_document);
-
 
     // azure
     let steps = &first_yaml_document["steps"];
@@ -109,26 +104,37 @@ fn parse_yaml_string(yaml: &str) -> Pipeline {
     }
 
     if first_yaml_document["jobs"].is_badvalue() {
-        println!("xx {:?}", first_yaml_document["jobs"])
+        println!("not github");
+        return azure_yaml_to_pipeline(&first_yaml_document["steps"]);
     }
 
     println!("xx {:?}", first_yaml_document["jobs"]);
-
-
 
     //github
     let gh_steps = &first_yaml_document["jobs"]["build"]["steps"];
     println!("{:?}", gh_steps);
 
+    return Pipeline { steps: vec![] };
+}
 
-    return Pipeline{
-        steps: vec![]
-    };
+fn azure_yaml_to_pipeline(steps: &yaml_rust::Yaml) -> Pipeline {
+    let y = steps
+        .as_vec()
+        .unwrap()
+        .iter()
+        .map(|x| Step {
+            //name: x["displayName"].as_str().unwrap().to_string(),
+            shell_script: x["shell_script"].as_str().unwrap().to_string(),
+            //working_directory: x["working_directory"].as_str().unwrap().to_string(),
+        })
+        .collect::<Vec<Step>>();
+
+    return Pipeline { steps: y };
 }
 
 #[derive(Debug)]
 pub struct Pipeline {
-    steps: Vec<Step>
+    steps: Vec<Step>,
 }
 
 impl PartialEq for Pipeline {
@@ -137,12 +143,11 @@ impl PartialEq for Pipeline {
     }
 }
 
-
 #[derive(Debug)]
 pub struct Step {
     shell_script: String,
-    name: String,
-    working_directory: String,
+   // name: String,
+   // working_directory: String,
 }
 
 fn shell_line_to_words(line: &str) -> Vec<&str> {
@@ -156,13 +161,15 @@ mod tests {
 
     #[test]
     fn test_shell_line_to_words() {
-        assert_eq!(shell_line_to_words(" this is my line "), vec!["this", "is", "my", "line"]);
+        assert_eq!(
+            shell_line_to_words(" this is my line "),
+            vec!["this", "is", "my", "line"]
+        );
     }
 
     #[test]
     fn test_pipeline_1() {
-        let input =
-"jobs:
+        let input = "jobs:
     build:
       steps:
         - name: configure
@@ -171,11 +178,22 @@ mod tests {
           run: make";
         let actual = parse_yaml_string(&input);
 
-        println!(
-                "{:#?}",
-                actual);
-        assert_eq!(actual, Pipeline{
-            steps: vec![]
-        })
+        println!("{:#?}", actual);
+        assert_eq!(actual, Pipeline { steps: vec![] })
     }
+
+
+    #[test]
+    fn test_pipeline_2() {
+        let input = "steps:
+  - script: ./configure
+  - script: make
+    displayName: Compile the Code
+  - script: make check";
+        let actual = parse_yaml_string(&input);
+
+        println!("{:#?}", actual);
+        assert_eq!(actual, Pipeline { steps: vec![] })
+    }
+
 }

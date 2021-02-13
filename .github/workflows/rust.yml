@@ -30,26 +30,26 @@ jobs:
     - run: localcirunner azure.yaml
       working-directory: test_data
 
-    # - name: Check if compiled binary exists
-    #   run: |
-    #       val f = java.io.File("test_data/a.out")
-    #       if (!f.exists()) {
-    #         throw RuntimeException("expected output file does not exist")
-    #       }
-    #       f.delete()
-    #   shell: kotlin -howtorun .main.kts {0}
+    - name: Check if compiled binary exists
+      run: |
+          val f = java.io.File("test_data/Main.class")
+          if (!f.exists()) {
+            throw RuntimeException("expected output file does not exist")
+          }
+          f.delete()
+      shell: kotlin -howtorun .main.kts {0}
 
     - run: localcirunner gh.yaml
       working-directory: test_data
 
-    # - name: Check if compiled binary exists
-    #   run: |
-    #     val f = java.io.File("test_data/a.out")
-    #     if (!f.exists()) {
-    #       throw RuntimeException("expected output file does not exist")
-    #     }
-    #     f.delete()
-    #   shell: kotlin -howtorun .main.kts {0}
+    - name: Check if compiled binary exists
+      run: |
+        val f = java.io.File("test_data/Main.class")
+        if (!f.exists()) {
+          throw RuntimeException("expected output file does not exist")
+        }
+        f.delete()
+      shell: kotlin -howtorun .main.kts {0}
 
     - name: Build
       run: cargo build --release --verbose

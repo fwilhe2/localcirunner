@@ -57,7 +57,7 @@ fn run_pipeline(pipeline: Pipeline) {
 fn shell_command(shell_script: String, working_directory: String) -> Command {
     let mut shell_interpreter = "";
     if cfg!(windows) {
-        shell_interpreter = "msys2bash.cmd";
+        shell_interpreter = "pwsh";
     } else if cfg!(unix) {
         shell_interpreter = "bash";
     }

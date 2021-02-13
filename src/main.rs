@@ -16,6 +16,7 @@ fn main() {
     let contents = fs::read_to_string(filename).expect("Something went wrong reading the file");
 
     let pipeline = parse_yaml_string(&contents);
+    run_pipeline(pipeline);
 
     // azure
     // let steps = &first_yaml_document["steps"];
@@ -47,6 +48,11 @@ fn main() {
     //         }
     //     }
     // }
+}
+
+fn run_pipeline(pipeline: Pipeline) {
+
+    let commands = pipeline.steps.iter().map(|x| Command::new("ls")).collect::<Vec<Command>>();
 }
 
 fn run_script(
@@ -100,7 +106,8 @@ fn parse_yaml_string(yaml: &str) -> Pipeline {
     // println!("{:?}", steps);
 
     if first_yaml_document["steps"].is_badvalue() {
-        println!("not azure")
+        println!("not azure");
+        return github_yaml_to_pipeline(&first_yaml_document["jobs"]);
     }
 
     if first_yaml_document["jobs"].is_badvalue() {
@@ -128,6 +135,23 @@ fn azure_yaml_to_pipeline(steps: &yaml_rust::Yaml) -> Pipeline {
             name: x["displayName"].as_str().unwrap_or("").to_string(),
             shell_script: x["script"].as_str().unwrap().to_string(),
             working_directory: x["workingDirectory"].as_str().unwrap_or("").to_string(),
+        })
+        .collect::<Vec<Step>>();
+
+    return Pipeline { steps: y };
+}
+
+fn github_yaml_to_pipeline(jobs: &yaml_rust::Yaml) -> Pipeline {
+    //fixme job name "build" is hardcoded
+    let steps = &jobs["build"]["steps"];
+    let y = steps
+        .as_vec()
+        .unwrap()
+        .iter()
+        .map(|x| Step {
+            name: x["name"].as_str().unwrap_or("").to_string(),
+            shell_script: x["run"].as_str().unwrap().to_string(),
+            working_directory: x["working-directory"].as_str().unwrap_or("").to_string(),
         })
         .collect::<Vec<Step>>();
 
@@ -180,8 +204,23 @@ mod tests {
           run: make";
         let actual = parse_yaml_string(&input);
 
+        let expected = Pipeline {
+            steps: vec![
+                Step {
+                    shell_script: "./configure".to_string(),
+                    name: "configure".to_string(),
+                    working_directory: "".to_string(),
+                },
+                Step {
+                    shell_script: "make".to_string(),
+                    name: "make".to_string(),
+                    working_directory: "".to_string(),
+                },
+            ],
+        };
+
         println!("{:#?}", actual);
-        assert_eq!(actual, Pipeline { steps: vec![] })
+        assert_eq!(actual, expected)
     }
 
     #[test]
@@ -201,25 +240,21 @@ mod tests {
                 Step {
                     shell_script: "./configure".to_string(),
                     name: "".to_string(),
-                    working_directory: "abc".to_string()
+                    working_directory: "abc".to_string(),
                 },
                 Step {
                     shell_script: "make".to_string(),
                     name: "Compile the Code".to_string(),
-                    working_directory: "".to_string()
+                    working_directory: "".to_string(),
                 },
                 Step {
                     shell_script: "make check".to_string(),
                     name: "".to_string(),
-                    working_directory: "".to_string()
+                    working_directory: "".to_string(),
                 },
             ],
         };
 
-
-        assert_eq!(
-            actual,
-            expected
-        )
+        assert_eq!(actual, expected)
     }
 }

@@ -52,45 +52,56 @@ fn main() {
 
 fn run_pipeline(pipeline: Pipeline) {
 
-    let commands = pipeline.steps.iter().map(|x| Command::new("ls")).collect::<Vec<Command>>();
+    let commands = pipeline.steps.iter().map(|step| shell_command(step.shell_script.to_owned(), step.working_directory.to_owned())).collect::<Vec<Command>>();
+
+
+    println!("{:#?}", commands)
 }
 
-fn run_script(
-    shell_script: &yaml_rust::Yaml,
-    name: &yaml_rust::Yaml,
-    working_directory: &yaml_rust::Yaml,
-) {
-    // println!("{}", shell_script.as_str().unwrap());
-    let shell_script_lines: Vec<&str> = shell_script.as_str().unwrap().split("\n").collect();
-    for line in shell_script_lines {
-        let mut shell_script_words: Vec<&str> = shell_line_to_words(line);
-        let mut my_command = Command::new(shell_script_words[0]);
-        let command_arguments: Vec<_> = shell_script_words.drain(1..).collect();
-        for argument in command_arguments {
-            my_command.arg(argument);
-        }
-        if working_directory.as_str().is_some() {
-            my_command.current_dir(working_directory.as_str().unwrap());
-        }
-        // println!(
-        //     "{:#?}",
-        //     my_command.output().expect("Could not execute command")
-        // );
+fn shell_command(shell_script: String, working_directory: String) -> Command {
+    let mut my_command = Command::new("bash");
+    my_command.arg("-c");
+    my_command.args(shell_line_to_words(&shell_script));
 
-        let output = my_command.output().expect("Could not execute command");
-
-        println!();
-
-        if name.as_str().is_some() {
-            println!("Step: {}", name.as_str().unwrap())
-        }
-        // println!("status: {}", output.status);
-        io::stdout().write_all(&output.stdout).unwrap();
-        io::stderr().write_all(&output.stderr).unwrap();
-
-        assert!(output.status.success());
-    }
+    return my_command;
 }
+
+// fn run_script(
+//     shell_script: &yaml_rust::Yaml,
+//     name: &yaml_rust::Yaml,
+//     working_directory: &yaml_rust::Yaml,
+// ) {
+//     // println!("{}", shell_script.as_str().unwrap());
+//     let shell_script_lines: Vec<&str> = shell_script.as_str().unwrap().split("\n").collect();
+//     for line in shell_script_lines {
+//         let mut shell_script_words: Vec<&str> = shell_line_to_words(line);
+//         let mut my_command = Command::new(shell_script_words[0]);
+//         let command_arguments: Vec<_> = shell_script_words.drain(1..).collect();
+//         for argument in command_arguments {
+//             my_command.arg(argument);
+//         }
+//         if working_directory.as_str().is_some() {
+//             my_command.current_dir(working_directory.as_str().unwrap());
+//         }
+//         // println!(
+//         //     "{:#?}",
+//         //     my_command.output().expect("Could not execute command")
+//         // );
+
+//         let output = my_command.output().expect("Could not execute command");
+
+//         println!();
+
+//         if name.as_str().is_some() {
+//             println!("Step: {}", name.as_str().unwrap())
+//         }
+//         // println!("status: {}", output.status);
+//         io::stdout().write_all(&output.stdout).unwrap();
+//         io::stderr().write_all(&output.stderr).unwrap();
+
+//         assert!(output.status.success());
+//     }
+// }
 
 fn parse_yaml_string(yaml: &str) -> Pipeline {
     let docs = YamlLoader::load_from_str(&yaml).unwrap();
@@ -176,8 +187,8 @@ pub struct Step {
     working_directory: String,
 }
 
-fn shell_line_to_words(line: &str) -> Vec<&str> {
-    line.trim().split(" ").collect()
+fn shell_line_to_words(line: &str) -> Vec<String> {
+    line.trim().split(" ").into_iter().collect()
 }
 
 #[cfg(test)]

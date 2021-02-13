@@ -50,12 +50,9 @@ fn run_pipeline(pipeline: Pipeline) {
 fn shell_command(shell_script: String, working_directory: String) -> Command {
     let mut my_command = Command::new("bash");
     my_command.arg("-c");
-    //my_command.args(shell_line_to_words(&shell_script));
-    let words = shell_line_to_words(&shell_script);
 
-    for w in words {
-        my_command.arg(w);
-    }
+    // fixme is it ok not to split words here?
+    my_command.arg(shell_script);
 
     println!("{:?}", my_command);
 
@@ -146,22 +143,11 @@ pub struct Step {
     working_directory: String,
 }
 
-fn shell_line_to_words(line: &str) -> Vec<&str> {
-    line.trim().split(" ").collect()
-}
 
 #[cfg(test)]
 mod tests {
     // Note this useful idiom: importing names from outer (for mod tests) scope.
     use super::*;
-
-    #[test]
-    fn test_shell_line_to_words() {
-        assert_eq!(
-            shell_line_to_words(" this is my line "),
-            vec!["this", "is", "my", "line"]
-        );
-    }
 
     #[test]
     fn test_pipeline_1() {

@@ -118,13 +118,15 @@ fn parse_yaml_string(yaml: &str) -> Pipeline {
 }
 
 fn azure_yaml_to_pipeline(steps: &yaml_rust::Yaml) -> Pipeline {
+    println!("xx {:?}", steps);
+
     let y = steps
         .as_vec()
         .unwrap()
         .iter()
         .map(|x| Step {
             //name: x["displayName"].as_str().unwrap().to_string(),
-            shell_script: x["shell_script"].as_str().unwrap().to_string(),
+            shell_script: x["script"].as_str().unwrap().to_string(),
             //working_directory: x["working_directory"].as_str().unwrap().to_string(),
         })
         .collect::<Vec<Step>>();
@@ -146,8 +148,8 @@ impl PartialEq for Pipeline {
 #[derive(Debug)]
 pub struct Step {
     shell_script: String,
-   // name: String,
-   // working_directory: String,
+    // name: String,
+    // working_directory: String,
 }
 
 fn shell_line_to_words(line: &str) -> Vec<&str> {
@@ -182,7 +184,6 @@ mod tests {
         assert_eq!(actual, Pipeline { steps: vec![] })
     }
 
-
     #[test]
     fn test_pipeline_2() {
         let input = "steps:
@@ -193,7 +194,25 @@ mod tests {
         let actual = parse_yaml_string(&input);
 
         println!("{:#?}", actual);
-        assert_eq!(actual, Pipeline { steps: vec![] })
-    }
 
+        let expected = Pipeline {
+            steps: vec![
+                Step {
+                    shell_script: "./configure".to_string(),
+                },
+                Step {
+                    shell_script: "make".to_string(),
+                },
+                Step {
+                    shell_script: "make check".to_string(),
+                },
+            ],
+        };
+
+
+        assert_eq!(
+            actual,
+            expected
+        )
+    }
 }

@@ -22,5 +22,5 @@ jobs:
         ls
         pwd
     - name: Clean temp directory
-      run: rm -rf *
+      run: echo rm -rf abc
       working-directory: ./temp

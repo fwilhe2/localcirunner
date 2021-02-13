@@ -9,7 +9,10 @@ env:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [macos-latest, windows-latest, ubuntu-20.04]
     steps:
     - uses: actions/checkout@v2
     - uses: fwilhe2/setup-kotlin@main
@@ -29,7 +32,7 @@ jobs:
 
     - name: Check if compiled binary exists
       run: |
-          val f = java.io.File("test_data/a.out")
+          val f = java.io.File("test_data/Main.class")
           if (!f.exists()) {
             throw RuntimeException("expected output file does not exist")
           }
@@ -41,7 +44,7 @@ jobs:
 
     - name: Check if compiled binary exists
       run: |
-        val f = java.io.File("test_data/a.out")
+        val f = java.io.File("test_data/Main.class")
         if (!f.exists()) {
           throw RuntimeException("expected output file does not exist")
         }

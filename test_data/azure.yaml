@@ -8,4 +8,3 @@ steps:
 - script: ./configure
 - script: make
   displayName: Compile the Code
-- script: make check

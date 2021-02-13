@@ -13,11 +13,11 @@ jobs:
       run: ./configure
     - name: make
       run: make
-    - name: make check
-      run: make check
-    - name: make distcheck
-      run: make distcheck
     - name: Test Multiline String
       run: |
         ls
         pwd
+    - name: test in dir
+      run: pwd; echo *
+      working-directory: ./dir
+    - run: pwd

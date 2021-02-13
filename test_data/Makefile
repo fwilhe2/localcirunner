@@ -1,6 +1,6 @@
 all:
-	cc main.c
+	clang main.c
 check:
-	cc main.c
+	clang main.c
 distcheck:
-	cc main.c
+	clang main.c

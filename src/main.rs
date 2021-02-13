@@ -102,7 +102,18 @@ fn parse_yaml_string(yaml: &str) -> Pipeline {
 
     // azure
     let steps = &first_yaml_document["steps"];
-    println!("{:?}", steps);
+    // println!("{:?}", steps);
+
+    if first_yaml_document["steps"].is_badvalue() {
+        println!("not azure")
+    }
+
+    if first_yaml_document["jobs"].is_badvalue() {
+        println!("xx {:?}", first_yaml_document["jobs"])
+    }
+
+    println!("xx {:?}", first_yaml_document["jobs"]);
+
 
 
     //github

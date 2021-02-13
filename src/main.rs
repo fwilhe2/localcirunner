@@ -65,64 +65,48 @@ fn parse_yaml_string(yaml: &str) -> Pipeline {
     // Multi document support, first_yaml_document is of type yaml::Yaml
     let first_yaml_document = &docs[0];
 
-    // Debug support
-    // println!("{:?}", first_yaml_document);
-
-    // azure
-    let steps = &first_yaml_document["steps"];
-    // println!("{:?}", steps);
-
     if first_yaml_document["steps"].is_badvalue() {
-        println!("not azure");
         return github_yaml_to_pipeline(&first_yaml_document["jobs"]);
     }
 
     if first_yaml_document["jobs"].is_badvalue() {
-        println!("not github");
         return azure_yaml_to_pipeline(&first_yaml_document["steps"]);
     }
 
-    println!("xx {:?}", first_yaml_document["jobs"]);
-
-    //github
-    let gh_steps = &first_yaml_document["jobs"]["build"]["steps"];
-    println!("{:?}", gh_steps);
-
-    return Pipeline { steps: vec![] };
+    panic!("should not get here, debug info: {:?}", first_yaml_document)
 }
 
 fn azure_yaml_to_pipeline(steps: &yaml_rust::Yaml) -> Pipeline {
-    println!("xx {:?}", steps);
-
-    let y = steps
-        .as_vec()
-        .unwrap()
-        .iter()
-        .map(|x| Step {
-            name: x["displayName"].as_str().unwrap_or("").to_string(),
-            shell_script: x["script"].as_str().unwrap().to_string(),
-            working_directory: x["workingDirectory"].as_str().unwrap_or("").to_string(),
-        })
-        .collect::<Vec<Step>>();
-
-    return Pipeline { steps: y };
+    return Pipeline {
+        steps: steps
+            .as_vec()
+            .unwrap()
+            .iter()
+            .map(|step| Step {
+                name: step["displayName"].as_str().unwrap_or("").to_string(),
+                shell_script: step["script"].as_str().unwrap().to_string(),
+                working_directory: step["workingDirectory"].as_str().unwrap_or("").to_string(),
+            })
+            .collect::<Vec<Step>>(),
+    };
 }
 
 fn github_yaml_to_pipeline(jobs: &yaml_rust::Yaml) -> Pipeline {
     //fixme job name "build" is hardcoded
     let steps = &jobs["build"]["steps"];
-    let y = steps
-        .as_vec()
-        .unwrap()
-        .iter()
-        .map(|x| Step {
-            name: x["name"].as_str().unwrap_or("").to_string(),
-            shell_script: x["run"].as_str().unwrap_or("echo nothing").to_string(),
-            working_directory: x["working-directory"].as_str().unwrap_or("").to_string(),
-        })
-        .collect::<Vec<Step>>();
 
-    return Pipeline { steps: y };
+    return Pipeline {
+        steps: steps
+            .as_vec()
+            .unwrap()
+            .iter()
+            .map(|step| Step {
+                name: step["name"].as_str().unwrap_or("").to_string(),
+                shell_script: step["run"].as_str().unwrap_or("echo nothing").to_string(),
+                working_directory: step["working-directory"].as_str().unwrap_or("").to_string(),
+            })
+            .collect::<Vec<Step>>(),
+    };
 }
 
 #[derive(Debug)]
@@ -142,7 +126,6 @@ pub struct Step {
     name: String,
     working_directory: String,
 }
-
 
 #[cfg(test)]
 mod tests {

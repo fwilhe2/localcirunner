@@ -54,6 +54,13 @@ jobs:
     - name: Build
       run: cargo build --release --verbose
 
+    - run: find target/release
+      shell: bash
+
+    - run: gh release upload "0.1.0" "target/release/localcirunner" --clobber
+      if: matrix.os == 'ubuntu-20.04'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 #    - name: Upload release binary
 #      uses: actions/upload-release-asset@v1.0.2
 #      env:

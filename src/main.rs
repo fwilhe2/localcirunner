@@ -55,7 +55,14 @@ fn run_pipeline(pipeline: Pipeline) {
 }
 
 fn shell_command(shell_script: String, working_directory: String) -> Command {
-    let mut my_command = Command::new("bash");
+    let mut shell_interpreter = "";
+    if cfg!(windows) {
+        shell_interpreter = "msys2bash.cmd";
+    } else if cfg!(unix) {
+        shell_interpreter = "bash";
+    }
+
+    let mut my_command = Command::new(shell_interpreter);
     my_command.arg("-c");
 
     // fixme is it ok not to split words here?

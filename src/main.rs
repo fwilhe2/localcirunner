@@ -7,6 +7,13 @@ use std::process::Command;
 extern crate yaml_rust;
 use yaml_rust::YamlLoader;
 
+// todo:
+// - default environment variables
+// - non-bash shells
+// - make output more pretty
+// - debug mode
+// - allow to configure job for gh workflows
+
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
@@ -53,6 +60,10 @@ fn shell_command(shell_script: String, working_directory: String) -> Command {
 
     // fixme is it ok not to split words here?
     my_command.arg(shell_script);
+
+    if working_directory != "" {
+        my_command.current_dir(working_directory);
+    }
 
     println!("{:?}", my_command);
 

@@ -21,6 +21,7 @@ jobs:
       run: |
         ls
         pwd
-    - name: Clean temp directory
-      run: echo rm -rf abc
-      working-directory: ./temp
+    - name: test in dir
+      run: pwd; echo *
+      working-directory: ./dir
+    - run: pwd

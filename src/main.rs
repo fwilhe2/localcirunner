@@ -26,7 +26,6 @@ fn main() {
     run_pipeline(pipeline);
 }
 
-
 fn parse_yaml_string(yaml: &str) -> Pipeline {
     let docs = YamlLoader::load_from_str(&yaml).unwrap();
 
@@ -89,13 +88,15 @@ fn shell_command(shell_script: String, working_directory: String, name: String) 
     // fixme is it ok not to split words here?
     my_command.arg(shell_script);
 
-    if working_directory != "" {
+    if !working_directory.is_empty() {
         my_command.current_dir(working_directory);
     }
 
-    return MyCommand{command: my_command, name: name};
+    MyCommand {
+        command: my_command,
+        name,
+    }
 }
-
 
 fn azure_yaml_to_pipeline(steps: &yaml_rust::Yaml) -> Pipeline {
     return Pipeline {

@@ -57,22 +57,8 @@ jobs:
     - run: find target/release
       shell: bash
 
-    - run: gh release upload "0.1.0" "target/release/localcirunner" --clobber
-      if: matrix.os == 'ubuntu-20.04'
+    - name: Upload release binary
+      run: gh release upload "0.1.0" "target/release/localcirunner" --clobber
+      if: matrix.os == 'ubuntu-20.04' && github.ref == 'refs/heads/master'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-#    - name: Upload release binary
-#      uses: actions/upload-release-asset@v1.0.2
-#      env:
-#        GITHUB_TOKEN: ${{ github.token }}
-#      with:
-#        upload_url: "https://uploads.github.com/repos/fwilhe2/localcirunner/releases/37758047/assets{?name,label}"
-#        asset_path: ./target/release/localcirunner
-#        asset_name: localcirunner
-#        asset_content_type: application/octet-stream
-
-    # - name: Run example
-    #   run: cargo run azure.yaml --verbose
-
-    # - name: Run example
-    #   run: cargo run gh.yaml --verbose

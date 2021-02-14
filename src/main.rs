@@ -52,6 +52,7 @@ fn run_pipeline(pipeline: Pipeline) {
                 step.shell_script.to_owned(),
                 step.working_directory.to_owned(),
                 step.name.to_owned(),
+                step.shell_interpreter.to_owned(),
             )
         })
         .collect::<Vec<MyCommand>>();
@@ -74,15 +75,13 @@ struct MyCommand {
     name: String,
 }
 
-fn shell_command(shell_script: String, working_directory: String, name: String) -> MyCommand {
-    let mut shell_interpreter = "";
-    if cfg!(windows) {
-        shell_interpreter = "pwsh";
-    } else if cfg!(unix) {
-        shell_interpreter = "bash";
-    }
-
-    let mut my_command = Command::new(shell_interpreter);
+fn shell_command(
+    shell_script: String,
+    working_directory: String,
+    name: String,
+    shell_interpreter: String,
+) -> MyCommand {
+    let mut my_command = Command::new(shell_interpreter_with_default(shell_interpreter));
     my_command.arg("-c");
 
     // fixme is it ok not to split words here?
@@ -98,6 +97,18 @@ fn shell_command(shell_script: String, working_directory: String, name: String) 
     }
 }
 
+fn shell_interpreter_with_default(shell_interpreter: String) -> String {
+    if shell_interpreter.is_empty() {
+        if cfg!(windows) {
+            return "pwsh".to_string();
+        } else if cfg!(unix) {
+            return "bash".to_string();
+        }
+    }
+
+    shell_interpreter
+}
+
 fn azure_yaml_to_pipeline(steps: &yaml_rust::Yaml) -> Pipeline {
     return Pipeline {
         steps: steps
@@ -111,6 +122,7 @@ fn azure_yaml_to_pipeline(steps: &yaml_rust::Yaml) -> Pipeline {
                     .unwrap_or("echo nothing")
                     .to_string(),
                 working_directory: step["workingDirectory"].as_str().unwrap_or("").to_string(),
+                shell_interpreter: "".to_string(), //fixme this seems not so simple https://docs.microsoft.com/en-us/azure/devops/pipelines/yaml-schema?view=azure-devops&tabs=schema%2Cparameter-schema#script
             })
             .collect::<Vec<Step>>(),
     };
@@ -129,6 +141,7 @@ fn github_yaml_to_pipeline(jobs: &yaml_rust::Yaml) -> Pipeline {
                 name: step["name"].as_str().unwrap_or("").to_string(),
                 shell_script: step["run"].as_str().unwrap_or("echo nothing").to_string(),
                 working_directory: step["working-directory"].as_str().unwrap_or("").to_string(),
+                shell_interpreter: step["shell"].as_str().unwrap_or("").to_string(),
             })
             .collect::<Vec<Step>>(),
     };
@@ -150,6 +163,7 @@ pub struct Step {
     shell_script: String,
     name: String,
     working_directory: String,
+    shell_interpreter: String,
 }
 
 #[cfg(test)]
@@ -170,31 +184,49 @@ mod tests {
                     shell_script: "echo nothing".to_string(),
                     name: "".to_string(),
                     working_directory: "".to_string(),
+                    shell_interpreter: "".to_string(),
                 },
                 Step {
                     shell_script: "./configure".to_string(),
                     name: "configure".to_string(),
                     working_directory: "".to_string(),
+                    shell_interpreter: "".to_string(),
                 },
                 Step {
                     shell_script: "make".to_string(),
                     name: "make".to_string(),
                     working_directory: "".to_string(),
+                    shell_interpreter: "".to_string(),
                 },
                 Step {
                     shell_script: "ls\npwd\n".to_string(),
                     name: "Test Multiline String".to_string(),
                     working_directory: "".to_string(),
+                    shell_interpreter: "".to_string(),
                 },
                 Step {
                     shell_script: "pwd; echo *".to_string(),
                     name: "test in dir".to_string(),
                     working_directory: "./dir".to_string(),
+                    shell_interpreter: "".to_string(),
                 },
                 Step {
                     shell_script: "pwd".to_string(),
                     name: "".to_string(),
                     working_directory: "".to_string(),
+                    shell_interpreter: "".to_string(),
+                },
+                Step {
+                    shell_script: "echo ${env:PATH}".to_string(),
+                    name: "Display the path".to_string(),
+                    working_directory: "".to_string(),
+                    shell_interpreter: "powershell".to_string(),
+                },
+                Step {
+                    shell_script: "import os\nprint(os.environ[\'PATH\'])\n".to_string(),
+                    name: "Display the path".to_string(),
+                    working_directory: "".to_string(),
+                    shell_interpreter: "python".to_string(),
                 },
             ],
         };
@@ -215,16 +247,19 @@ mod tests {
                     shell_script: "./configure".to_string(),
                     name: "".to_string(),
                     working_directory: "".to_string(),
+                    shell_interpreter: "".to_string(),
                 },
                 Step {
                     shell_script: "make".to_string(),
                     name: "Compile the Code".to_string(),
                     working_directory: "".to_string(),
+                    shell_interpreter: "".to_string(),
                 },
                 Step {
                     shell_script: "pwd; echo *".to_string(),
                     name: "test in dir".to_string(),
                     working_directory: "./dir".to_string(),
+                    shell_interpreter: "".to_string(),
                 },
             ],
         };

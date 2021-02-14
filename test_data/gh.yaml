@@ -21,3 +21,12 @@ jobs:
       run: pwd; echo *
       working-directory: ./dir
     - run: pwd
+    - name: Display the path
+      run: echo ${env:PATH}
+      shell: powershell
+
+    - name: Display the path
+      run: |
+        import os
+        print(os.environ['PATH'])
+      shell: python

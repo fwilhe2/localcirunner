@@ -26,56 +26,6 @@ fn main() {
     run_pipeline(pipeline);
 }
 
-fn run_pipeline(pipeline: Pipeline) {
-    let commands = pipeline
-        .steps
-        .iter()
-        .map(|step| {
-            shell_command(
-                step.shell_script.to_owned(),
-                step.working_directory.to_owned(),
-            )
-        })
-        .collect::<Vec<Command>>();
-
-    for mut c in commands {
-        let output = c.output().expect("Could not execute command");
-
-        println!();
-
-        // if name.as_str().is_some() {
-        //     println!("Step: {}", name.as_str().unwrap())
-        // }
-        // println!("status: {}", output.status);
-        io::stdout().write_all(&output.stdout).unwrap();
-        io::stderr().write_all(&output.stderr).unwrap();
-
-        assert!(output.status.success());
-    }
-}
-
-fn shell_command(shell_script: String, working_directory: String) -> Command {
-    let mut shell_interpreter = "";
-    if cfg!(windows) {
-        shell_interpreter = "pwsh";
-    } else if cfg!(unix) {
-        shell_interpreter = "bash";
-    }
-
-    let mut my_command = Command::new(shell_interpreter);
-    my_command.arg("-c");
-
-    // fixme is it ok not to split words here?
-    my_command.arg(shell_script);
-
-    if working_directory != "" {
-        my_command.current_dir(working_directory);
-    }
-
-    println!("{:?}", my_command);
-
-    return my_command;
-}
 
 fn parse_yaml_string(yaml: &str) -> Pipeline {
     let docs = YamlLoader::load_from_str(&yaml).unwrap();
@@ -93,6 +43,59 @@ fn parse_yaml_string(yaml: &str) -> Pipeline {
 
     panic!("should not get here, debug info: {:?}", first_yaml_document)
 }
+
+fn run_pipeline(pipeline: Pipeline) {
+    let commands = pipeline
+        .steps
+        .iter()
+        .map(|step| {
+            shell_command(
+                step.shell_script.to_owned(),
+                step.working_directory.to_owned(),
+                step.name.to_owned(),
+            )
+        })
+        .collect::<Vec<MyCommand>>();
+
+    for mut c in commands {
+        let output = c.command.output().expect("Could not execute command");
+
+        println!("\n[STEP] {}", c.name);
+        println!("{:?}", c.command);
+
+        io::stdout().write_all(&output.stdout).unwrap();
+        io::stderr().write_all(&output.stderr).unwrap();
+
+        assert!(output.status.success());
+    }
+}
+
+struct MyCommand {
+    command: Command,
+    name: String,
+}
+
+fn shell_command(shell_script: String, working_directory: String, name: String) -> MyCommand {
+    let mut shell_interpreter = "";
+    if cfg!(windows) {
+        shell_interpreter = "pwsh";
+    } else if cfg!(unix) {
+        shell_interpreter = "bash";
+    }
+
+    let mut my_command = Command::new(shell_interpreter);
+    my_command.arg("-c");
+
+    // fixme is it ok not to split words here?
+    my_command.arg(shell_script);
+
+    if working_directory != "" {
+        my_command.current_dir(working_directory);
+    }
+
+    return MyCommand{command: my_command, name: name};
+}
+
 
 fn azure_yaml_to_pipeline(steps: &yaml_rust::Yaml) -> Pipeline {
     return Pipeline {

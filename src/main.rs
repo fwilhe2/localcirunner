@@ -102,7 +102,10 @@ fn azure_yaml_to_pipeline(steps: &yaml_rust::Yaml) -> Pipeline {
             .iter()
             .map(|step| Step {
                 name: step["displayName"].as_str().unwrap_or("").to_string(),
-                shell_script: step["script"].as_str().unwrap().to_string(),
+                shell_script: step["script"]
+                    .as_str()
+                    .unwrap_or("echo nothing")
+                    .to_string(),
                 working_directory: step["workingDirectory"].as_str().unwrap_or("").to_string(),
             })
             .collect::<Vec<Step>>(),
@@ -151,18 +154,19 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_pipeline_1() {
-        let input = "jobs:
-    build:
-      steps:
-        - name: configure
-          run: ./configure
-        - name: make
-          run: make";
+    fn test_pipeline_github() {
+        let input =
+            fs::read_to_string("test_data/gh.yaml").expect("Something went wrong reading the file");
+
         let actual = parse_yaml_string(&input);
 
         let expected = Pipeline {
             steps: vec![
+                Step {
+                    shell_script: "echo nothing".to_string(),
+                    name: "".to_string(),
+                    working_directory: "".to_string(),
+                },
                 Step {
                     shell_script: "./configure".to_string(),
                     name: "configure".to_string(),
@@ -173,31 +177,40 @@ mod tests {
                     name: "make".to_string(),
                     working_directory: "".to_string(),
                 },
+                Step {
+                    shell_script: "ls\npwd\n".to_string(),
+                    name: "Test Multiline String".to_string(),
+                    working_directory: "".to_string(),
+                },
+                Step {
+                    shell_script: "pwd; echo *".to_string(),
+                    name: "test in dir".to_string(),
+                    working_directory: "./dir".to_string(),
+                },
+                Step {
+                    shell_script: "pwd".to_string(),
+                    name: "".to_string(),
+                    working_directory: "".to_string(),
+                },
             ],
         };
 
-        println!("{:#?}", actual);
         assert_eq!(actual, expected)
     }
 
     #[test]
-    fn test_pipeline_2() {
-        let input = "steps:
-  - script: ./configure
-    workingDirectory: abc
-  - script: make
-    displayName: Compile the Code
-  - script: make check";
-        let actual = parse_yaml_string(&input);
+    fn test_pipeline_azure() {
+        let input = fs::read_to_string("test_data/azure.yaml")
+            .expect("Something went wrong reading the file");
 
-        println!("{:#?}", actual);
+        let actual = parse_yaml_string(&input);
 
         let expected = Pipeline {
             steps: vec![
                 Step {
                     shell_script: "./configure".to_string(),
                     name: "".to_string(),
-                    working_directory: "abc".to_string(),
+                    working_directory: "".to_string(),
                 },
                 Step {
                     shell_script: "make".to_string(),
@@ -205,9 +218,9 @@ mod tests {
                     working_directory: "".to_string(),
                 },
                 Step {
-                    shell_script: "make check".to_string(),
-                    name: "".to_string(),
-                    working_directory: "".to_string(),
+                    shell_script: "pwd; echo *".to_string(),
+                    name: "test in dir".to_string(),
+                    working_directory: "./dir".to_string(),
                 },
             ],
         };

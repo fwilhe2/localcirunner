@@ -15,6 +15,8 @@ use yaml_rust::YamlLoader;
 // - allow to configure job for gh workflows
 
 fn main() {
+    
+    
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
         panic!("Missing required argument filename.\n  Usage: localcirunner .github/workflows/test.yml")

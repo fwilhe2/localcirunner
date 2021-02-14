@@ -8,3 +8,6 @@ steps:
 - script: ./configure
 - script: make
   displayName: Compile the Code
+- name: test in dir
+  script: pwd; echo *
+  workingDirectory: ./dir

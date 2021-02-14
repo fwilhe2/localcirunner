@@ -154,7 +154,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_pipeline_1() {
+    fn test_pipeline_github() {
         let input =
             fs::read_to_string("test_data/gh.yaml").expect("Something went wrong reading the file");
 
@@ -199,13 +199,11 @@ mod tests {
     }
 
     #[test]
-    fn test_pipeline_2() {
+    fn test_pipeline_azure() {
         let input = fs::read_to_string("test_data/azure.yaml")
             .expect("Something went wrong reading the file");
 
         let actual = parse_yaml_string(&input);
-
-        println!("{:#?}", actual);
 
         let expected = Pipeline {
             steps: vec![
@@ -218,6 +216,11 @@ mod tests {
                     shell_script: "make".to_string(),
                     name: "Compile the Code".to_string(),
                     working_directory: "".to_string(),
+                },
+                Step {
+                    shell_script: "pwd; echo *".to_string(),
+                    name: "test in dir".to_string(),
+                    working_directory: "./dir".to_string(),
                 },
             ],
         };

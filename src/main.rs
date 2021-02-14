@@ -3,6 +3,7 @@ use std::fs;
 use std::io;
 use std::io::Write;
 use std::process::Command;
+use std::process;
 
 extern crate yaml_rust;
 use yaml_rust::YamlLoader;
@@ -17,13 +18,29 @@ use yaml_rust::YamlLoader;
 fn main() {
     let args: Vec<String> = env::args().collect();
     if args.len() < 2 {
-        panic!("Missing required argument filename.\n  Usage: localcirunner .github/workflows/test.yml")
+        println!("Missing required argument filename.\n  Usage: localcirunner .github/workflows/test.yml");
+        process::exit(1);
     }
-    let filename = &args[1];
-    let contents = fs::read_to_string(filename).expect("Something went wrong reading the file");
+    let command =  &args[1];
+    if command == "help" || command == "--help" {
+        usage()
+    }
+    if command == "version" {
+        println!("Commit {}", env!("GIT_HASH"));
+        println!("Version {}", env!("CARGO_PKG_VERSION"));
+    }
+    if command == "run" {
+        let filename = &args[2];
+        let contents = fs::read_to_string(filename).expect("Something went wrong reading the file");
 
-    let pipeline = parse_yaml_string(&contents);
-    run_pipeline(pipeline);
+        let pipeline = parse_yaml_string(&contents);
+        run_pipeline(pipeline);
+    }
+
+}
+
+fn usage() {
+    println!("Usage: localcirunner <command> [path]")
 }
 
 fn parse_yaml_string(yaml: &str) -> Pipeline {

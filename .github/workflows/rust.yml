@@ -58,7 +58,19 @@ jobs:
       shell: bash
 
     - name: Upload release binary
-      run: gh release upload "0.1.0" "target/release/localcirunner" --clobber
-      if: matrix.os == 'ubuntu-20.04' && github.ref == 'refs/heads/master'
+      run: cp target/release/localcirunner localcirunner-linux; gh release upload "0.1.0" "localcirunner-linux" --clobber
+      if: matrix.os == 'ubuntu-20.04' && github.ref == 'refs/heads/main'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload release binary
+      run: cp target/release/localcirunner localcirunner-macos; gh release upload "0.1.0" "localcirunner-macos" --clobber
+      if: matrix.os == 'macos-latest' && github.ref == 'refs/heads/main'
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Upload release binary
+      run: gh release upload "0.1.0" "target/release/localcirunner.exe" --clobber
+      if: matrix.os == 'windows-latest' && github.ref == 'refs/heads/main'
       env:
         GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

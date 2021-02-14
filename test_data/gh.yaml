@@ -23,7 +23,7 @@ jobs:
     - run: pwd
     - name: Display the path
       run: echo ${env:PATH}
-      shell: powershell
+      shell: pwsh
 
     - name: Display the path
       run: |

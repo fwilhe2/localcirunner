@@ -7,6 +7,9 @@ use std::process::Command;
 extern crate yaml_rust;
 use yaml_rust::YamlLoader;
 
+use std::path::PathBuf;
+use structopt::StructOpt;
+
 // todo:
 // - default environment variables
 // - non-bash shells
@@ -14,16 +17,35 @@ use yaml_rust::YamlLoader;
 // - debug mode
 // - allow to configure job for gh workflows
 
-fn main() {
-    let args: Vec<String> = env::args().collect();
-    if args.len() < 2 {
-        panic!("Missing required argument filename.\n  Usage: localcirunner .github/workflows/test.yml")
-    }
-    let filename = &args[1];
-    let contents = fs::read_to_string(filename).expect("Something went wrong reading the file");
+/// Run your CI workflows locally
+#[derive(StructOpt, Debug)]
+#[structopt(name = "localcirunner")]
+struct Opt {
+    /// Activate debug mode
+    #[structopt(short, long)]
+    debug: bool,
 
-    let pipeline = parse_yaml_string(&contents);
-    run_pipeline(pipeline);
+    /// Files to process
+    #[structopt(name = "FILE", parse(from_os_str))]
+    files: Vec<PathBuf>,
+}
+
+fn main() {
+    let opt = Opt::from_args();
+    let debug = opt.debug;
+
+    if debug {
+        println!("{:#?}", opt);
+    }
+
+    let files = opt.files;
+
+    for f in files {
+        let contents = fs::read_to_string(f).expect("Something went wrong reading the file");
+
+        let pipeline = parse_yaml_string(&contents);
+        run_pipeline(pipeline);
+    }
 }
 
 fn parse_yaml_string(yaml: &str) -> Pipeline {

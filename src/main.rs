@@ -57,6 +57,7 @@ fn run_pipeline(pipeline: Pipeline) {
 
     for mut c in commands {
         println!("\n[STEP] {}", c.name);
+        println!("{:?}", c.command);
 
         let mut cmd = c
             .command

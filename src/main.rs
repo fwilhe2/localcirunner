@@ -2,7 +2,7 @@ use std::env;
 use std::fs;
 use std::io;
 use std::io::Write;
-use std::process::Command;
+use std::process::{Command, Stdio};
 
 extern crate yaml_rust;
 use yaml_rust::YamlLoader;
@@ -58,15 +58,17 @@ fn run_pipeline(pipeline: Pipeline) {
         .collect::<Vec<MyCommand>>();
 
     for mut c in commands {
-        let output = c.command.output().expect("Could not execute command");
-
         println!("\n[STEP] {}", c.name);
-        println!("{:?}", c.command);
 
-        io::stdout().write_all(&output.stdout).unwrap();
-        io::stderr().write_all(&output.stderr).unwrap();
+        let mut cmd = c
+            .command
+            .stdout(Stdio::inherit())
+            .stderr(Stdio::inherit())
+            .spawn()
+            .unwrap();
 
-        assert!(output.status.success());
+        let status = cmd.wait().expect("Could not execute command");
+        assert!(status.success());
     }
 }
 

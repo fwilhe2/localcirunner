@@ -1,7 +1,5 @@
 use std::env;
 use std::fs;
-use std::io;
-use std::io::Write;
 use std::process::{Command, Stdio};
 
 extern crate yaml_rust;

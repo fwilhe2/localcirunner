@@ -1,0 +1,8 @@
+version: 2
+updates:
+  - package-ecosystem: 'rust:cargo'
+    directory: '/'
+    assignees:
+      - "fwilhe2"
+    schedule:
+      interval: 'weekly'
